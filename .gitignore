@@ -5,3 +5,4 @@ dist
 .prettierrc
 .wepycache
 .wepyignore
+project.config.json

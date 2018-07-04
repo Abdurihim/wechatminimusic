@@ -1,0 +1,201 @@
+<style lang="less">
+  .top {
+    width: 100%;
+    height: 250rpx;
+    background-color: #d81e06;
+    position: relative;
+  }
+
+  .ke_fu {
+    display: inline-block;
+    width: 60rpx;
+    height: 60rpx;
+    right: 30rpx;
+    top: 20rpx;
+    float: right;
+    position: absolute;
+  }
+
+  .info {
+    width: 100%;
+  }
+
+  .avatar {
+    width: 100rpx;
+    height: 100rpx;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 50rpx;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .nickname {
+    margin-bottom: 15rpx;
+    margin-top: 20rpx;
+    display: block;
+    text-align: center;
+  }
+
+  .menu {
+    width: 100%;
+    height: 110rpx;
+  }
+
+  .left {
+    float: left;
+    text-align: center;
+    line-height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  .icon {
+    display: inline-block;
+    width: 50rpx;
+    height: 50rpx;
+    margin-left: 30rpx;
+    margin-top: 30rpx;
+    margin-bottom: 30rpx;
+  }
+
+  .menu_text {
+    margin-left: 20rpx;
+    font-size: 25rpx;
+    color: #d81e06;
+  }
+
+  .arrow {
+    display: inline-block;
+    width: 50rpx;
+    height: 50rpx;
+    float: right;
+    margin-top: 30rpx;
+    margin-bottom: 30rpx;
+    margin-right: 15rpx;
+  }
+
+  .line {
+    display: block;
+    height: 1rpx;
+    background-color: #ccc;
+    margin: 0 20rpx;
+    clear: both;
+  }
+</style>
+
+<template>
+  <view class="container">
+    <view class="top">
+      <image class="ke_fu" src="../images/ke_fu.png"/>
+      <view class="info">
+        <open-data type="userAvatarUrl" class="avatar"/>
+        <open-data type="userNickName" class="nickname"></open-data>
+      </view>
+    </view>
+
+    <view class="menu" bindtap="goToSongList">
+      <view class="left">
+        <image class="icon" src="../images/save_song_file.png"/>
+        <text class="menu_text">保存的歌曲列表</text>
+      </view>
+      <image class="arrow" src="../images/arrow.png"/>
+      <text class="line"/>
+    </view>
+
+    <view class="menu"  bindtap="goToPicList">
+      <view class="left">
+        <image class="icon" src="../images/save_pic_file.png"/>
+        <text class="menu_text">保存的图片</text>
+      </view>
+      <image class="arrow" src="../images/arrow.png"/>
+      <text class="line"/>
+    </view>
+
+    <view class="menu" bindtap="clearCache">
+      <view class="left">
+        <image class="icon" src="../images/clear_cache.png"/>
+        <text class="menu_text">清除缓存</text>
+      </view>
+      <image class="arrow" src="../images/arrow.png"/>
+      <text class="line"/>
+    </view>
+  </view>
+  <view>
+    <button open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="onGotUserInfo"
+     style="display: none">获取用户信息</button>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import BasePage from './basepage'
+
+  export default class Mine extends BasePage {
+    config = {
+      navigationBarTitleText: '设置',
+      navigationBarBackgroundColor: '#d81e06',
+      navigationBarTextStyle: 'white',
+      backgroundColor: '#d81e06'
+    }
+    components = {
+      
+    }
+
+    data = {
+      
+    }
+
+    computed = {
+      
+    }
+
+    methods = {
+      goToPicList(e) {
+        wepy.navigateTo({
+          url: '/pages/piclist'
+        });
+      },
+
+      goToSongList(e) {
+        wepy.navigateTo({
+          url: '/pages/songlist'
+        });
+      },
+
+      clearCache(e) {
+        console.log(e);
+      },
+
+      onGotUserInfo(e) {
+        console.log(e);
+      }
+    }
+
+    async onLoad() {
+      // 查看是否授权
+      try {
+      const setting = await wepy.getSetting({
+        success: function(res) {
+          if (res.authSetting['scope.userInfo']) {
+            
+          }
+        },
+        fail: function(res) {
+          console.log(res);
+        },
+        complete: function(res) {
+          console.log(res);
+        }
+      });
+
+      console.log(setting);
+    } catch(error) {
+      console.log(error);
+    }
+  }
+
+}
+</script>

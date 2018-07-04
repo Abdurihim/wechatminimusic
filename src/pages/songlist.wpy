@@ -1,0 +1,39 @@
+<style lang="less">
+  
+</style>
+
+<template>
+  <view class="container">
+    
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import BasePage from './basepage'
+
+export default class SaveSongList extends BasePage {
+  config = {
+    navigationBarTitleText: '保存歌曲'
+  }
+  components = {
+  }
+
+  data = {
+    
+  }
+
+  computed = {
+    
+  }
+
+  methods = {
+    
+  }
+
+  onLoad() {
+    
+  }
+
+}
+</script>

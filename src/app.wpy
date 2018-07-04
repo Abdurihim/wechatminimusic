@@ -13,17 +13,38 @@
 import wepy from 'wepy'
 import 'wepy-async-function'
 
-
 export default class extends wepy.app {
   config = {
     pages: [
-      'pages/index'
+      'pages/network',
+      'pages/mine',
+      'pages/songlist',
+      'pages/piclist'
     ],
     window: {
-      backgroundTextStyle: 'light',
+      backgroundTextStyle: 'dark',
       navigationBarBackgroundColor: '#fff',
-      navigationBarTitleText: 'WeChat',
+      navigationBarTitleText: 'Mini-Music',
       navigationBarTextStyle: 'black'
+    },
+    tabBar: {
+      'color': '#666666',
+      'selectedColor': '#d81e06',
+      'borderStyle': '#666666',
+      'backgroundColor': '#ffffff',
+      'position': 'bottom',
+      list:[{
+          'pagePath': 'pages/network',
+          'text': '在线',
+          'iconPath': 'images/network_normal.png',
+          'selectedIconPath': 'images/network_pressed.png'
+      },
+      {
+        'pagePath': 'pages/mine',
+        'text': '我的',
+        'iconPath': 'images/mine_normal.png',
+        'selectedIconPath': 'images/mine_pressed.png'
+      }]
     }
   }
 
