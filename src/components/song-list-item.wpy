@@ -2,9 +2,10 @@
       <view class="item-container">
         <view class="song-item">
           <view class="line"/>
-          <image class="song-avatar" src="{{item.src}}"/>
+          <image class="song-avatar" src="{{item.pic_small}}"/>
           <view class="song-text">
               <text class="song-title">{{item.title}}</text>
+              <text class="song-album">{{item.album_title}}</text>
               <text class="song-author">{{item.author}}</text>
           </view>
         </view>
@@ -42,12 +43,12 @@
 
   .song-item {
     width: 95%;
-    height: 100rpx;
+    height: 131rpx;
     margin: 0 auto;
   }
 
   .line {
-    height: 80rpx;
+    height: 110rpx;
     width: 5rpx;
     display: inline;
     background-color: #d81e06;
@@ -56,8 +57,8 @@
   }
 
   .song-avatar {
-    width: 90rpx;
-    height: 90rpx;
+    width: 120rpx;
+    height: 120rpx;
     margin-top: 5rpx;
     margin-bottom: 5rpx;
     float: left;
@@ -66,20 +67,29 @@
 
   .song-text {
     display: flex;
-    height: 100%;
-    flex-wrap: wrap;
     flex-direction: column;
     justify-content: center;
+    align-content: center;
+    height: 100%;
   }
 
   .song-title {
     font-size: 30rpx;
-    margin-bottom: 5rpx;
+    margin-bottom: 2rpx;
+    display: block;
+  }
+
+  .song-album {
+    font-size: 20rpx;
+    margin-top: 2rpx;
+    color: #666;
+    display: block;
   }
 
   .song-author {
     font-size: 20rpx;
-    margin-top: 5rpx;
-    color: #ccc;
+    margin-top: 2rpx;
+    color: #999;
+    display: block;
   }
 </style>

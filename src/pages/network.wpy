@@ -15,6 +15,7 @@ import wepy from 'wepy'
 import BasePage from './basepage'
 import SongListItem from '../components/song-list-item'
 import HttpRequest from '../utils/http-request'
+import {getMusicList} from '../utils/http-request'
 
 export default class Network extends BasePage {
   config = {
@@ -29,27 +30,8 @@ export default class Network extends BasePage {
   }
 
   data = {
-    list: [{
-      "src": "https://goss.veer.com/creative/vcg/veer/800water/veer-151543894.jpg",
-      "title": "歌曲名字",
-      "author": "歌曲作者"
-    },{
-      "src": "https://goss.veer.com/creative/vcg/veer/800water/veer-151543894.jpg",
-      "title": "歌曲名字",
-      "author": "歌曲作者"
-    },{
-      "src": "https://goss.veer.com/creative/vcg/veer/800water/veer-151543894.jpg",
-      "title": "歌曲名字",
-      "author": "歌曲作者"
-    },{
-      "src": "https://goss.veer.com/creative/vcg/veer/800water/veer-151543894.jpg",
-      "title": "歌曲名字",
-      "author": "歌曲作者"
-    },{
-      "src": "https://goss.veer.com/creative/vcg/veer/800water/veer-151543894.jpg",
-      "title": "歌曲名字",
-      "author": "歌曲作者"
-    }]
+    list: [],
+    offset: 0,
   }
 
   computed = {
@@ -60,22 +42,39 @@ export default class Network extends BasePage {
     
   }
 
+  async getList(offset) {
+    let res = await HttpRequest.getMusicList(2);
+    console.log(res);
+    wepy.stopPullDownRefresh();
+    if (offset == 0) {
+      this.list = [];
+    }
+    this.list = this.list.concat(res.data.song_list);
+    console.log(this.list);
+    this.$apply();
+  }
+
   onLoad() {
     
   }
 
   onReady() {
-    HttpRequest.getMusicList(2);
+    this.getList(0);
   }
   
   onPullDownRefresh() {
     console.log('onPullDownRefresh method invoke. page');
-    wepy.stopPullDownRefresh();
+    this.getList(0);
   }
 
   onReachBottom() {
     console.log('onReachBottom method invoke. page.');
+    this.offset = this.offset + 20;
+    console.log("bottom offset:" + this.offset);
+    this.getList(this.offset);
   }
+
+  
 
 }
 </script>
