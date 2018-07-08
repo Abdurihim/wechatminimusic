@@ -5,8 +5,8 @@
           <image class="song-avatar" src="{{item.pic_small}}"/>
           <view class="song-text">
               <text class="song-title">{{item.title}}</text>
-              <text class="song-album">{{item.album_title}}</text>
-              <text class="song-author">{{item.author}}</text>
+              <text class="song-album">专辑：{{item.album_title}}</text>
+              <text class="song-author">演唱：{{item.author}}</text>
           </view>
         </view>
         <text class="divider"/>
@@ -77,19 +77,22 @@
     font-size: 30rpx;
     margin-bottom: 2rpx;
     display: block;
+    color: #d81e06;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .song-album {
-    font-size: 20rpx;
-    margin-top: 2rpx;
-    color: #666;
+    font-size: 22rpx;
+    margin-top: 5rpx;
+    color: #333;
     display: block;
   }
 
   .song-author {
-    font-size: 20rpx;
-    margin-top: 2rpx;
-    color: #999;
+    font-size: 22rpx;
+    margin-top: 5rpx;
+    color: #666;
     display: block;
   }
 </style>

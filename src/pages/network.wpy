@@ -15,7 +15,6 @@ import wepy from 'wepy'
 import BasePage from './basepage'
 import SongListItem from '../components/song-list-item'
 import HttpRequest from '../utils/http-request'
-import {getMusicList} from '../utils/http-request'
 
 export default class Network extends BasePage {
   config = {

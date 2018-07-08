@@ -1,91 +1,3 @@
-<style lang="less">
-  .top {
-    width: 100%;
-    height: 250rpx;
-    background-color: #d81e06;
-    position: relative;
-  }
-
-  .ke_fu {
-    display: inline-block;
-    width: 60rpx;
-    height: 60rpx;
-    right: 30rpx;
-    top: 20rpx;
-    float: right;
-    position: absolute;
-  }
-
-  .info {
-    width: 100%;
-  }
-
-  .avatar {
-    width: 100rpx;
-    height: 100rpx;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 50rpx;
-    border-radius: 50%;
-    overflow: hidden;
-  }
-
-  .nickname {
-    margin-bottom: 15rpx;
-    margin-top: 20rpx;
-    display: block;
-    text-align: center;
-  }
-
-  .menu {
-    width: 100%;
-    height: 110rpx;
-  }
-
-  .left {
-    float: left;
-    text-align: center;
-    line-height: 100%;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-  }
-
-  .icon {
-    display: inline-block;
-    width: 50rpx;
-    height: 50rpx;
-    margin-left: 30rpx;
-    margin-top: 30rpx;
-    margin-bottom: 30rpx;
-  }
-
-  .menu_text {
-    margin-left: 20rpx;
-    font-size: 25rpx;
-    color: #d81e06;
-  }
-
-  .arrow {
-    display: inline-block;
-    width: 50rpx;
-    height: 50rpx;
-    float: right;
-    margin-top: 30rpx;
-    margin-bottom: 30rpx;
-    margin-right: 15rpx;
-  }
-
-  .line {
-    display: block;
-    height: 1rpx;
-    background-color: #ccc;
-    margin: 0 20rpx;
-    clear: both;
-  }
-</style>
-
 <template>
   <view class="container">
     <view class="top">
@@ -174,23 +86,31 @@
       }
     }
 
-    async onLoad() {
+    onLoad() {
+      
+    }
+
+    onReady() {
+      this.checkSetting();
+    }
+
+    async checkSetting() {
       // 查看是否授权
       try {
-      const setting = await wepy.getSetting({
-        success: function(res) {
-          if (res.authSetting['scope.userInfo']) {
-            
-          }
-        },
-        fail: function(res) {
-          console.log(res);
-        },
-        complete: function(res) {
-          console.log(res);
-        }
-      });
+        const setting = await wepy.getSetting({
 
+          success: function(res) {
+              if (res.authSetting['scope.userInfo']) {
+                
+              }
+          },
+          fail: function(res) {
+              console.log(res);
+          },
+          complete: function(res) {
+              console.log(res);
+          }
+      });
       console.log(setting);
     } catch(error) {
       console.log(error);
@@ -199,3 +119,91 @@
 
 }
 </script>
+
+<style lang="less">
+  .top {
+    width: 100%;
+    height: 250rpx;
+    background-color: #d81e06;
+    position: relative;
+  }
+
+  .ke_fu {
+    display: inline-block;
+    width: 60rpx;
+    height: 60rpx;
+    right: 30rpx;
+    top: 20rpx;
+    float: right;
+    position: absolute;
+  }
+
+  .info {
+    width: 100%;
+  }
+
+  .avatar {
+    width: 100rpx;
+    height: 100rpx;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 50rpx;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+
+  .nickname {
+    margin-bottom: 15rpx;
+    margin-top: 20rpx;
+    display: block;
+    text-align: center;
+  }
+
+  .menu {
+    width: 100%;
+    height: 110rpx;
+  }
+
+  .left {
+    float: left;
+    text-align: center;
+    line-height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  .icon {
+    display: inline-block;
+    width: 50rpx;
+    height: 50rpx;
+    margin-left: 30rpx;
+    margin-top: 30rpx;
+    margin-bottom: 30rpx;
+  }
+
+  .menu_text {
+    margin-left: 20rpx;
+    font-size: 25rpx;
+    color: #d81e06;
+  }
+
+  .arrow {
+    display: inline-block;
+    width: 50rpx;
+    height: 50rpx;
+    float: right;
+    margin-top: 30rpx;
+    margin-bottom: 30rpx;
+    margin-right: 15rpx;
+  }
+
+  .line {
+    display: block;
+    height: 1rpx;
+    background-color: #ccc;
+    margin: 0 20rpx;
+    clear: both;
+  }
+</style>

@@ -4,23 +4,28 @@
 
 <template>
   <view class="container">
-    
+    <repeat for="{{list}}" key="index" index="index" item="item">
+      <songlistitem :item="item"></songlistitem>
+    </repeat>
   </view>
 </template>
 
 <script>
 import wepy from 'wepy'
 import BasePage from './basepage'
+import SongListItem from '../components/song-list-item'
+import HttpRequest from '../utils/http-request'
 
 export default class SaveSongList extends BasePage {
   config = {
     navigationBarTitleText: '保存歌曲',
   }
   components = {
+    songlistitem: SongListItem,
   }
 
   data = {
-    
+    list: [],
   }
 
   computed = {
@@ -33,6 +38,18 @@ export default class SaveSongList extends BasePage {
 
   onLoad() {
     
+  }
+
+  onReady() {
+    this.getList(0);
+  }
+
+  async getList(offset) {
+    let res = await HttpRequest.getMusicList(2);
+    console.log(res);
+    this.list = this.list.concat(res.data.song_list);
+    console.log(this.list);
+    this.$apply();
   }
 
 }
