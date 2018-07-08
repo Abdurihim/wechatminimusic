@@ -19,7 +19,8 @@ export default class extends wepy.app {
       'pages/network',
       'pages/mine',
       'pages/songlist',
-      'pages/piclist'
+      'pages/piclist',
+      'pages/song_item_info'
     ],
     window: {
       backgroundTextStyle: 'dark',

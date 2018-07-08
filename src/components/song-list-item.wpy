@@ -1,6 +1,6 @@
 <template>
       <view class="item-container">
-        <view class="song-item">
+        <view class="song-item" bindtap="goToItemInfo">
           <view class="line"/>
           <image class="song-avatar" src="{{item.pic_small}}"/>
           <view class="song-text">
@@ -21,7 +21,11 @@
     }
 
     methods = {
-      
+      goToItemInfo(e) {
+        wepy.navigateTo({
+          url: '/pages/song_item_info',
+        });
+      },
     }
 
     onLoad () {

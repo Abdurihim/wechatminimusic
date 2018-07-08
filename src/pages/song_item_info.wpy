@@ -1,0 +1,45 @@
+<template>
+  <view class="container">
+    
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import BasePage from './basepage'
+
+  export default class SongItemInfo extends BasePage {
+    config = {
+      navigationBarTitleText: '歌曲信息',
+    }
+    components = {
+      
+    }
+
+    data = {
+      
+    }
+
+    computed = {
+      
+    }
+
+    methods = {
+      
+    }
+
+    onLoad() {
+      
+    }
+
+    onReady() {
+    
+    }
+
+
+}
+</script>
+
+<style lang="less">
+  
+</style>
