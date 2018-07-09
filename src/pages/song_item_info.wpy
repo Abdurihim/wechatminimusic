@@ -1,5 +1,6 @@
 <template>
   <view class="container">
+    <img class="top-img" src="../images/logo.png"/>
     
   </view>
 </template>
