@@ -1,6 +1,6 @@
 <template>
       <view class="item-container">
-        <view class="song-item" bindtap="goToItemInfo">
+        <view class="song-item" data-songid="{{item.song_id}}" bindtap="goToItemInfo">
           <view class="line"/>
           <image class="song-avatar" src="{{item.pic_small}}"/>
           <view class="song-text">
@@ -22,8 +22,9 @@
 
     methods = {
       goToItemInfo(e) {
+        console.log(e);
         wepy.navigateTo({
-          url: '/pages/song_item_info',
+          url: '/pages/song_item_info?song_id=' + e.currentTarget.dataset['songid'],
         });
       },
     }

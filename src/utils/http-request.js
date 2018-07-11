@@ -10,9 +10,20 @@ export default class HttpRequest {
 				type: type,
 				method: 'baidu.ting.billboard.billList',
 				size: size,
-				offset: offset
+				offset: offset,
 			},
 			dataType: "json",
+		});
+	}
+
+	static getMusicInfo = (songId) => {
+		return wepy.request({
+			url: 'http:\/\/tingapi.ting.baidu.com/v1/restserver/ting',
+			method: 'GET',
+			data: {
+				method: 'baidu.ting.song.play',
+				songid: songId,
+			},
 		});
 	}
 }

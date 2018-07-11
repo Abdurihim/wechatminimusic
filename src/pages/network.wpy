@@ -42,7 +42,7 @@ export default class Network extends BasePage {
   }
 
   async getList(offset) {
-    let res = await HttpRequest.getMusicList(2);
+    let res = await HttpRequest.getMusicList(2, offset);
     console.log(res);
     wepy.stopPullDownRefresh();
     if (offset == 0) {

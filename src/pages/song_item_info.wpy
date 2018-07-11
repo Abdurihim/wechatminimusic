@@ -1,6 +1,8 @@
 <template>
   <view class="container">
-    <img class="top-img" src="../images/logo.png"/>
+    <text class="info-author">歌手：{{musicInfo.songinfo.author}}</text>
+    <text class="info-album" bindtap="getAlbumInfo">专辑：{{musicInfo.songinfo.album_title}}</text>
+    <image class="info-img" mode="widthFix" src="{{musicImg}}"/>
     
   </view>
 </template>
@@ -8,6 +10,7 @@
 <script>
   import wepy from 'wepy'
   import BasePage from './basepage'
+  import HttpRequest from '../utils/http-request'
 
   export default class SongItemInfo extends BasePage {
     config = {
@@ -18,7 +21,9 @@
     }
 
     data = {
-      
+      songId: '',
+      musicInfo: undefined,
+      musicImg: '',
     }
 
     computed = {
@@ -26,21 +31,81 @@
     }
 
     methods = {
-      
+      getAlbumInfo(e) {
+        console.log(e);
+      },
     }
 
-    onLoad() {
-      
+    onLoad(options) {
+      console.log(options);
+      this.songId = options.song_id;
     }
 
     onReady() {
-    
+      this.getMusicInfo();
     }
 
+    async getMusicInfo() {
+      let res = await HttpRequest.getMusicInfo(this.songId);
+      this.musicInfo = res.data;
+      console.log(this.musicInfo);
+
+      this.setNavigationBarMusicTitle(this.musicInfo.songinfo.title);
+      this.setMusicImg();
+      this.$apply();
+    }
+
+    setNavigationBarMusicTitle(songTitle) {
+      if (songTitle) {
+        wepy.setNavigationBarTitle({
+          title: songTitle,
+        });
+      }
+    }
+
+    setMusicImg() {
+      this.musicImg = this.musicInfo.songinfo.pic_huge;
+      if (!this.musicImg) {
+        this.musicImg = this.musicInfo.songinfo.pic_big;
+      }
+      if (!this.musicImg) {
+        this.musicImg = this.musicInfo.songinfo.pic_premium;
+      }
+      if (!this.musicImg) {
+        this.musicImg = this.musicInfo.songinfo.pic_small;
+      }
+
+      if (!this.musicImg) {
+        this.musicImg = "http://p4.music.126.net/53yErDUlZ6cP9GhK6EnZig==/1399678303632262.jpg";
+      }
+    }
 
 }
 </script>
 
 <style lang="less">
-  
+  .info-author {
+    text-align: center;
+    height: 50rpx;
+    line-height: 50rpx;
+    margin-top: 20rpx;
+    color: #d81e06;
+    font-size: 35rpx;
+  }
+
+  .info-album {
+    text-align: center;
+    height: 50rpx;
+    line-height: 50rpx;
+    margin-top: 20rpx;
+    font-size: 25rpx;
+  }
+
+  .info-img {
+    border-radius: 50%;
+    display: block;
+    width: 90%;
+    min-height: 200rpx;
+    margin-top: 50rpx;
+  }
 </style>
