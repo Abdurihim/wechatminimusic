@@ -1,0 +1,5 @@
+exports.PLAY_MODE = {
+	LIST_CYCLE: 1,
+	ONE_CYCLE: 2,
+	RANDOW_CYCLE: 3,
+}

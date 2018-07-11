@@ -6,13 +6,13 @@
     
     <view class="menu-container">
       <view class="menu">
-        <image class="menu-icon play-mode" src="../images/list_cycle.png"></image>
+        <image class="menu-icon play-mode" src="{{playModeIcon}}" bindtap="playMode"></image>
         <view  class="music-menu">
-          <image class="menu-icon pre" src="../images/pre.png"></image>
-          <image class="menu-icon pause" src="../images/pause.png"></image>
-          <image class="menu-icon next" src="../images/next.png"></image>
+          <image class="menu-icon pre" src="../images/pre.png" bindtap="pre"></image>
+          <image class="menu-icon pause" src="{{pausedIcon}}" bindtap="pauseOrPlay"></image>
+          <image class="menu-icon next" src="../images/next.png" bindtap="next"></image>
         </view>
-        <image class="menu-icon list" src="../images/list.png"></image>
+        <image class="menu-icon list" src="../images/list.png" bindtap="playList"></image>
       </view>
     </view>
   </view>
@@ -23,6 +23,7 @@
   import BasePage from './basepage'
   import HttpRequest from '../utils/http-request'
   import ToastUtil from '../utils/toast-util'
+  import PLAY_MODE from '../utils/const'
 
   export default class SongItemInfo extends BasePage {
     config = {
@@ -36,6 +37,10 @@
       songId: '',
       musicInfo: undefined,
       musicImg: '',
+      backgroundAudioManager: undefined,
+      pausedIcon: "../images/play.png",
+      playMode: PLAY_MODE.LIST_CYCLE,
+      playModeIcon: '../images/list_cycle.png',
     }
 
     computed = {
@@ -45,6 +50,37 @@
     methods = {
       getAlbumInfo(e) {
         console.log(e);
+      },
+
+      playMode(e) {
+        if (this.playMode === PLAY_MODE.LIST_CYCLE) {
+          this.playMode = PLAY_MODE.ONE_CYCLE;
+          this.playModeIcon = '../images/single_cycle.png';
+        } else if(this.playMode === PLAY_MODE.ONE_CYCLE) {
+          this.playMode = PLAY_MODE.RANDOW_CYCLE;
+          this.playModeIcon = '../images/random_cycle.png';
+        } else if (this.playMode === PLAY_MODE.RANDOW_CYCLE) {
+          this.playMode = PLAY_MODE.LIST_CYCLE;
+          this.playModeIcon = '../images/list_cycle.png';
+        }
+        this.$apply();
+      },
+      pre(e) {
+
+      },
+      pauseOrPlay(e) {
+        let paused = this.backgroundAudioManager.paused;
+        if (paused) {
+          this.playMusic();
+        } else {
+          this.pauseAudio();
+        }
+      },
+      next(e) {
+
+      },
+      playList(e) {
+
       },
     }
 
@@ -57,10 +93,6 @@
       this.getMusicInfo();
     }
 
-    onUnload() {
-      
-    }
-
     async getMusicInfo() {
       let res = await HttpRequest.getMusicInfo(this.songId);
       this.musicInfo = res.data;
@@ -69,6 +101,7 @@
       this.setNavigationBarMusicTitle(this.musicInfo.songinfo.title);
       this.setMusicImg();
       this.playMusic();
+      this.initAudioMananger();
       this.$apply();
     }
 
@@ -102,11 +135,31 @@
         ToastUtil.showToast('没有有效的歌曲文件');
         return;
       }
-      wx.playBackgroundAudio({
+      wepy.playBackgroundAudio({
           dataUrl: this.musicInfo.bitrate.file_link,
           title: this.musicInfo.songinfo.title,
           coverImgUrl: this.musicImg,
       });
+      this.pausedIcon = "../images/play.png";
+      this.$apply();
+    }
+
+    initAudioMananger() {
+      let that = this;
+      this.backgroundAudioManager = wepy.getBackgroundAudioManager();
+      this.backgroundAudioManager.onStop(function(e) {
+        console.log(e);
+      });
+      this.backgroundAudioManager.onPause(function(e) {
+        that.pauseAudio();
+      });
+      console.log(this.backgroundAudioManager);
+    }
+
+    pauseAudio() {
+      wepy.pauseBackgroundAudio();
+      this.pausedIcon = "../images/pause.png";
+      this.$apply();
     }
 
 }
