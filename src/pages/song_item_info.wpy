@@ -2,11 +2,11 @@
   <view class="container">
     <text class="info-author">歌手：{{musicInfo.songinfo.author}}</text>
     <text class="info-album" bindtap="getAlbumInfo">专辑：{{musicInfo.songinfo.album_title}}</text>
-    <image class="info-img" mode="widthFix" src="{{musicImg}}"/>
+    <image class="info-img" mode="widthFix" src="{{musicImg}}" @tap="showBigImg"/>
     
     <view class="menu-container">
       <view class="menu">
-        <image class="menu-icon play-mode" src="{{playModeIcon}}" bindtap="playMode"></image>
+        <image class="menu-icon play-mode" src="{{playModeIcon}}" @tap="switchPlayMode"></image>
         <view  class="music-menu">
           <image class="menu-icon pre" src="../images/pre.png" bindtap="pre"></image>
           <image class="menu-icon pause" src="{{pausedIcon}}" bindtap="pauseOrPlay"></image>
@@ -49,10 +49,13 @@
 
     methods = {
       getAlbumInfo(e) {
-        console.log(e);
+        console.log("getAlbumInfo ->" + e);
       },
 
-      playMode(e) {
+      switchPlayMode(e) {
+        console.log("switchPlayMode->" + e);
+        console.log(this.playMode);
+
         if (this.playMode === PLAY_MODE.LIST_CYCLE) {
           this.playMode = PLAY_MODE.ONE_CYCLE;
           this.playModeIcon = '../images/single_cycle.png';
@@ -81,6 +84,13 @@
       },
       playList(e) {
 
+      },
+      showBigImg(e) {
+        console.log(e);
+        wepy.previewImage({
+          current: this.musicImg,
+          urls: [this.musicImg],
+        });
       },
     }
 
@@ -148,20 +158,42 @@
       let that = this;
       this.backgroundAudioManager = wepy.getBackgroundAudioManager();
       this.backgroundAudioManager.onStop(function(e) {
-        console.log(e);
+        console.log("onStop ->" + e);
       });
       this.backgroundAudioManager.onPause(function(e) {
-        that.pauseAudio();
+        that.pauseAudio(e);
+      });
+      this.backgroundAudioManager.onEnded(function(e) {
+        that.playEnd(e, that);
+      });
+      this.backgroundAudioManager.onError(function(e) {
+        that.playError(e);
       });
       console.log(this.backgroundAudioManager);
     }
 
-    pauseAudio() {
+    pauseAudio(e) {
       wepy.pauseBackgroundAudio();
       this.pausedIcon = "../images/pause.png";
       this.$apply();
     }
 
+    playEnd(e, that) {
+      console.log(e);
+      console.log("playEnd -> " + that.playMode);
+      if (that.playMode === PLAY_MODE.LIST_CYCLE) {
+
+      } else if (that.playMode === PLAY_MODE.ONE_CYCLE) {
+        that.playMusic();
+      } else if (that.playMode === PLAY_MODE.RANDOW_CYCLE) {
+
+      }
+    }
+
+    playError(e) {
+      console.log(e);
+      console.log("play error");
+    }
 }
 </script>
 
