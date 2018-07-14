@@ -14,6 +14,12 @@
         </view>
         <image class="menu-icon list" src="../images/list.png" bindtap="playList"></image>
       </view>
+      <view class="bottom-menu">
+          <text class="bottom-menu-text">下载歌曲</text>
+          <text class="bottom-menu-text">保存图片</text>
+          <text class="bottom-menu-text">查看歌手</text>
+          <text class="bottom-menu-text">查看专辑</text>
+      </view>
     </view>
   </view>
 </template>
@@ -23,7 +29,6 @@
   import BasePage from './basepage'
   import HttpRequest from '../utils/http-request'
   import ToastUtil from '../utils/toast-util'
-  import PLAY_MODE from '../utils/const'
 
   export default class SongItemInfo extends BasePage {
     config = {
@@ -39,7 +44,8 @@
       musicImg: '',
       backgroundAudioManager: undefined,
       pausedIcon: "../images/play.png",
-      playMode: PLAY_MODE.LIST_CYCLE,
+      Const: undefined,
+      playMode: undefined,
       playModeIcon: '../images/list_cycle.png',
     }
 
@@ -53,24 +59,25 @@
       },
 
       switchPlayMode(e) {
-        console.log("switchPlayMode->" + e);
-        console.log(this.playMode);
-
-        if (this.playMode === PLAY_MODE.LIST_CYCLE) {
-          this.playMode = PLAY_MODE.ONE_CYCLE;
+        if (this.playMode === this.Const.PLAY_MODE.LIST_CYCLE) {
+          this.playMode = this.Const.PLAY_MODE.ONE_CYCLE;
           this.playModeIcon = '../images/single_cycle.png';
-        } else if(this.playMode === PLAY_MODE.ONE_CYCLE) {
-          this.playMode = PLAY_MODE.RANDOW_CYCLE;
+
+        } else if(this.playMode === this.Const.PLAY_MODE.ONE_CYCLE) {
+          this.playMode = this.Const.PLAY_MODE.RANDOM_CYCLE;
           this.playModeIcon = '../images/random_cycle.png';
-        } else if (this.playMode === PLAY_MODE.RANDOW_CYCLE) {
-          this.playMode = PLAY_MODE.LIST_CYCLE;
+
+        } else if (this.playMode === this.Const.PLAY_MODE.RANDOM_CYCLE) {
+          this.playMode = this.Const.PLAY_MODE.LIST_CYCLE;
           this.playModeIcon = '../images/list_cycle.png';
         }
         this.$apply();
       },
+
       pre(e) {
 
       },
+
       pauseOrPlay(e) {
         let paused = this.backgroundAudioManager.paused;
         if (paused) {
@@ -79,14 +86,16 @@
           this.pauseAudio();
         }
       },
+
       next(e) {
 
       },
+
       playList(e) {
 
       },
+
       showBigImg(e) {
-        console.log(e);
         wepy.previewImage({
           current: this.musicImg,
           urls: [this.musicImg],
@@ -101,6 +110,9 @@
 
     onReady() {
       this.getMusicInfo();
+      this.Const = require('../utils/const');
+      this.playMode = this.Const.PLAY_MODE.LIST_CYCLE;
+      this.$apply();
     }
 
     async getMusicInfo() {
@@ -179,21 +191,28 @@
     }
 
     playEnd(e, that) {
-      console.log(e);
-      console.log("playEnd -> " + that.playMode);
-      if (that.playMode === PLAY_MODE.LIST_CYCLE) {
+      if (that.playMode === this.Const.PLAY_MODE.LIST_CYCLE) {
 
-      } else if (that.playMode === PLAY_MODE.ONE_CYCLE) {
+
+      } else if (that.playMode === this.Const.PLAY_MODE.ONE_CYCLE) {
         that.playMusic();
-      } else if (that.playMode === PLAY_MODE.RANDOW_CYCLE) {
+
+      } else if (that.playMode === this.Const.PLAY_MODE.RANDOW_CYCLE) {
 
       }
     }
 
     playError(e) {
-      console.log(e);
       console.log("play error");
     }
+
+    onShareAppMessage(res) {
+    return {
+      title: 'Mini-Music:' + this.musicInfo.songinfo.title + '-' + this.musicInfo.songinfo.author,
+      path: '/page/song_item_info?song_id=' + this.songId,
+      imageUrl: this.musicImg,
+    }
+  }
 }
 </script>
 
@@ -239,7 +258,7 @@
   .menu-container {
     position: absolute;
     width: 100%;
-    height: 100rpx;
+    height: 120rpx;
     line-height: 100rpx;
     bottom: 60rpx;
   }
@@ -264,6 +283,11 @@
     height: 60rpx;
   }
 
+  .play-mode {
+    width: 50rpx;
+    height: 50rpx;
+  }
+
   .pause {
     width: 80rpx;
     height: 80rpx;
@@ -272,6 +296,18 @@
 
   .list {
     width: 50rpx;
-    height: 50rpx;
+    height: 40rpx;
+  }
+
+  .bottom-menu {
+    display: flex;
+    flex-direction: norow;
+    align-items: center;
+    justify-content: space-around;
+  }
+
+  .bottom-menu-text {
+    font-size: 25rpx;
+    color: #d81e06;
   }
 </style>
