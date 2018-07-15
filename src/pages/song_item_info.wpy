@@ -1,10 +1,15 @@
 <template>
   <view class="container">
-    <text class="info-author">歌手：{{musicInfo.songinfo.author}}</text>
+    <text class="info-author" @tap="getAuthorInfo">歌手：{{musicInfo.songinfo.author}}</text>
     <text class="info-album" bindtap="getAlbumInfo">专辑：{{musicInfo.songinfo.album_title}}</text>
     <image class="info-img" mode="widthFix" src="{{musicImg}}" @tap="showBigImg"/>
-    
+
     <view class="menu-container">
+      <view >
+        <text >00:00</text>
+        <progress percent="40" stroke-width="12" />
+        <text>02:00</text>
+      </view>
       <view class="menu">
         <image class="menu-icon play-mode" src="{{playModeIcon}}" @tap="switchPlayMode"></image>
         <view  class="music-menu">
@@ -13,12 +18,6 @@
           <image class="menu-icon next" src="../images/next.png" bindtap="next"></image>
         </view>
         <image class="menu-icon list" src="../images/list.png" bindtap="playList"></image>
-      </view>
-      <view class="bottom-menu">
-          <text class="bottom-menu-text">下载歌曲</text>
-          <text class="bottom-menu-text">保存图片</text>
-          <text class="bottom-menu-text">查看歌手</text>
-          <text class="bottom-menu-text">查看专辑</text>
       </view>
     </view>
   </view>
@@ -56,6 +55,10 @@
     methods = {
       getAlbumInfo(e) {
         console.log("getAlbumInfo ->" + e);
+      },
+
+      getAuthorInfo(e) {
+        console.log("getAuthorInfo() ->" + e);
       },
 
       switchPlayMode(e) {
