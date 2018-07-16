@@ -2,12 +2,12 @@
   <view class="container">
     <text class="info-author" @tap="getAuthorInfo">歌手：{{musicInfo.songinfo.author}}</text>
     <text class="info-album" bindtap="getAlbumInfo">专辑：{{musicInfo.songinfo.album_title}}</text>
-    <image class="info-img" mode="widthFix" src="{{musicImg}}" @tap="showBigImg"/>
+    <image class="{{hasAnim ? 'info-img-anim' : 'info-img'}}" mode="widthFix" src="{{musicImg}}" @tap="showBigImg"/>
 
     <view class="menu-container">
       <view class="slider-container">
         <text class="slider-time">{{startTime}}</text>
-        <slider class="slider" bindchange="slider4Change" min="0" max="100" block-size="12" value="{{sliderValue}}"/>
+        <slider class="slider" bindchange="slider4Change" bindchanging="slider4Changing" min="0" max="100" block-size="12" step="0.1" value="{{sliderValue}}"/>
         <text class="slider-time">{{endTime}}</text>
       </view>
       <view class="menu">
@@ -49,6 +49,7 @@
       sliderValue: 1,
       startTime: '00:00',
       endTime: '00:00',
+      hasAnim: true,
     }
 
     computed = {
@@ -109,8 +110,17 @@
       },
 
       slider4Change(e) {
-        console.log(e);
+        this.changeSliderValue(e.detail.value);
       },
+
+      slider4Changing(e) {
+        this.changeSliderValue(e.detail.value);
+      },
+    }
+
+    changeSliderValue(currentValue) {
+        var seek = (currentValue/100) * this.musicInfo.bitrate.file_duration;
+        this.backgroundAudioManager.seek(seek);
     }
 
     onLoad(options) {
@@ -166,6 +176,7 @@
     playMusic() {
       if (!this.musicInfo.bitrate.file_link) {
         ToastUtil.showToast('没有有效的歌曲文件');
+        this.hasAnim = false;
         return;
       }
       wepy.playBackgroundAudio({
@@ -174,6 +185,7 @@
           coverImgUrl: this.musicImg,
       });
       this.pausedIcon = "../images/play.png";
+      this.hasAnim = true;
       this.$apply();
     }
 
@@ -194,7 +206,6 @@
       });
       this.backgroundAudioManager.onTimeUpdate(function(e) {
         that.sliderValue = 100 * (that.backgroundAudioManager.currentTime/that.musicInfo.bitrate.file_duration);
-        console.log(that.sliderValue);
         that.updateStartTime(that, that.backgroundAudioManager.currentTime);
         that.$apply();
       });
@@ -203,23 +214,33 @@
 
     updateStartTime(that, currentTime) {
       that.startTime = parseInt(currentTime/60);
-      that.startTime = "0" + that.startTime + ":" + parseInt(currentTime%60);
-      console.log("update start time:" + that.startTime);
+      var second = parseInt(currentTime%60);
+      if (second >= 0 && second <= 9) {
+        that.startTime = "0" + that.startTime + ":0" + second;
+      } else {
+        that.startTime = "0" + that.startTime + ":" + second;
+      }
     }
 
     initMusicTime() {
       this.endTime = parseInt(this.musicInfo.bitrate.file_duration/60);
-      this.endTime = "0" + this.endTime + ":" + this.musicInfo.bitrate.file_duration%60;
-      console.log("init music end time:" + this.endTime);
+      var second = this.musicInfo.bitrate.file_duration%60;
+      if (second >= 0 && second <= 9) {
+        this.endTime = "0" + this.endTime + ":0" + second;
+      } else {
+        this.endTime = "0" + this.endTime + ":" + second;
+      }
     }
 
     pauseAudio(e) {
       wepy.pauseBackgroundAudio();
       this.pausedIcon = "../images/pause.png";
+      this.hasAnim = false;
       this.$apply();
     }
 
     playEnd(e, that) {
+      that.hasAnim = false;
       if (that.playMode === this.Const.PLAY_MODE.LIST_CYCLE) {
 
 
@@ -229,10 +250,12 @@
       } else if (that.playMode === this.Const.PLAY_MODE.RANDOW_CYCLE) {
 
       }
+      that.$apply();
     }
 
     playError(e) {
       console.log("play error");
+      this.hasAnim = false;
     }
 
     onShareAppMessage(res) {
@@ -264,6 +287,17 @@
   }
 
   .info-img {
+    border-radius: 50%;
+    display: block;
+    width: 90%;
+    min-height: 675rpx;
+    max-height: 100%;
+    margin-top: 50rpx;
+    background-color: #ccc;
+    -webkit-animation:rotateImg 0s linear infinite;
+  }
+
+  .info-img-anim {
     border-radius: 50%;
     display: block;
     width: 90%;
