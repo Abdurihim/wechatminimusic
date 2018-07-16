@@ -99,7 +99,9 @@
       },
 
       playList(e) {
-
+        wepy.navigateTo({
+          url: '/pages/songlist'
+        });
       },
 
       showBigImg(e) {
@@ -145,7 +147,43 @@
       this.playMusic();
       this.initAudioMananger();
       this.initMusicTime();
+      this.saveSongInfo();
       this.$apply();
+    }
+
+    //缓存最近播放歌曲列表
+    saveSongInfo() {
+      var songIds = wepy.getStorageSync(this.Const.STORE_KEY.SONG_IDS);
+      var songIdsArray = [];
+      var hasSongId = false;
+      if (songIds) {
+        songIdsArray = JSON.parse(songIds);
+        for (var i = songIdsArray.length-1; i >= 0; i--) {
+          if (songIdsArray[i] == this.songId) {
+            hasSongId = true;
+            break;
+          }
+        }
+
+        if (!hasSongId) {
+          if (songIdsArray.length >= this.Const.MAX_SAVE_LEN.LEN) {
+            var songIdRemove = songIdsArray.pop();
+            wepy.removeStorageSync(songIdRemove);
+          }
+          songIdsArray.push(this.songId);
+        }
+      } else {
+        songIdsArray.push(this.songId);
+      }
+
+      wepy.setStorage({
+        key: this.Const.STORE_KEY.SONG_IDS,
+        data: JSON.stringify(songIdsArray),
+      });
+      wepy.setStorage({
+        key: this.songId,
+        data: JSON.stringify(this.musicInfo),
+      });
     }
 
     setNavigationBarMusicTitle(songTitle) {
@@ -205,11 +243,12 @@
         that.playError(e);
       });
       this.backgroundAudioManager.onTimeUpdate(function(e) {
-        that.sliderValue = 100 * (that.backgroundAudioManager.currentTime/that.musicInfo.bitrate.file_duration);
-        that.updateStartTime(that, that.backgroundAudioManager.currentTime);
-        that.$apply();
+        if (that.backgroundAudioManager && that.backgroundAudioManager.currentTime) {
+          that.sliderValue = 100 * (that.backgroundAudioManager.currentTime/that.musicInfo.bitrate.file_duration);
+          that.updateStartTime(that, that.backgroundAudioManager.currentTime);
+          that.$apply();
+        }
       });
-      console.log(this.backgroundAudioManager);
     }
 
     updateStartTime(that, currentTime) {

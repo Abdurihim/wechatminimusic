@@ -11,7 +11,7 @@
     <view class="menu" bindtap="goToSongList">
       <view class="left">
         <image class="icon" src="../images/save_song_file.png"/>
-        <text class="menu_text">保存的歌曲列表</text>
+        <text class="menu_text">最近的播放列表</text>
       </view>
       <image class="arrow" src="../images/arrow.png"/>
       <text class="line"/>
@@ -44,6 +44,7 @@
 <script>
   import wepy from 'wepy'
   import BasePage from './basepage'
+  import ToastUtil from '../utils/toast-util'
 
   export default class Mine extends BasePage {
     config = {
@@ -78,7 +79,8 @@
       },
 
       clearCache(e) {
-        console.log(e);
+        wepy.clearStorageSync();
+        ToastUtil.showToast("已清理");
       },
 
       onGotUserInfo(e) {
