@@ -28,6 +28,7 @@
   import BasePage from './basepage'
   import HttpRequest from '../utils/http-request'
   import ToastUtil from '../utils/toast-util'
+  import LocalMusicInfo from '../utils/save-music-info'
 
   export default class SongItemInfo extends BasePage {
     config = {
@@ -82,7 +83,7 @@
       },
 
       pre(e) {
-
+        this.playPre();
       },
 
       pauseOrPlay(e) {
@@ -95,7 +96,7 @@
       },
 
       next(e) {
-
+        this.playNext();
       },
 
       playList(e) {
@@ -113,9 +114,11 @@
 
       slider4Change(e) {
         this.changeSliderValue(e.detail.value);
+        wepy.playBackgroundAudio();
       },
 
       slider4Changing(e) {
+        wepy.pauseBackgroundAudio();
         this.changeSliderValue(e.detail.value);
       },
     }
@@ -153,37 +156,7 @@
 
     //缓存最近播放歌曲列表
     saveSongInfo() {
-      var songIds = wepy.getStorageSync(this.Const.STORE_KEY.SONG_IDS);
-      var songIdsArray = [];
-      var hasSongId = false;
-      if (songIds) {
-        songIdsArray = JSON.parse(songIds);
-        for (var i = songIdsArray.length-1; i >= 0; i--) {
-          if (songIdsArray[i] == this.songId) {
-            hasSongId = true;
-            break;
-          }
-        }
-
-        if (!hasSongId) {
-          if (songIdsArray.length >= this.Const.MAX_SAVE_LEN.LEN) {
-            var songIdRemove = songIdsArray.pop();
-            wepy.removeStorageSync(songIdRemove);
-          }
-          songIdsArray.push(this.songId);
-        }
-      } else {
-        songIdsArray.push(this.songId);
-      }
-
-      wepy.setStorage({
-        key: this.Const.STORE_KEY.SONG_IDS,
-        data: JSON.stringify(songIdsArray),
-      });
-      wepy.setStorage({
-        key: this.songId,
-        data: JSON.stringify(this.musicInfo),
-      });
+      LocalMusicInfo.saveSongInfo(this.songId, this.musicInfo);
     }
 
     setNavigationBarMusicTitle(songTitle) {
@@ -211,6 +184,15 @@
       }
     }
 
+    playNext() {
+      this.songId = LocalMusicInfo.getNextSongInfo(this.songId);
+      this.getMusicInfo();
+    }
+
+    playPre() {
+      this.songId = LocalMusicInfo.getPreSongInfo(this.songId);
+      this.getMusicInfo();
+    }
     playMusic() {
       if (!this.musicInfo.bitrate.file_link) {
         ToastUtil.showToast('没有有效的歌曲文件');
@@ -232,6 +214,7 @@
       this.backgroundAudioManager = wepy.getBackgroundAudioManager();
       this.backgroundAudioManager.onStop(function(e) {
         console.log("onStop ->" + e);
+        that.pauseAudio(e);
       });
       this.backgroundAudioManager.onPause(function(e) {
         that.pauseAudio(e);
@@ -280,8 +263,9 @@
 
     playEnd(e, that) {
       that.hasAnim = false;
+      console.log(that.playMode);
       if (that.playMode === this.Const.PLAY_MODE.LIST_CYCLE) {
-
+        that.playNext();
 
       } else if (that.playMode === this.Const.PLAY_MODE.ONE_CYCLE) {
         that.playMusic();
@@ -362,7 +346,7 @@
     width: 100%;
     height: 150rpx;
     line-height: 100rpx;
-    bottom: 60rpx;
+    bottom: 80rpx;
   }
 
   .menu {

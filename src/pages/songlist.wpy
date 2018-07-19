@@ -15,6 +15,7 @@ import wepy from 'wepy'
 import BasePage from './basepage'
 import SongListItem from '../components/song-list-item'
 import HttpRequest from '../utils/http-request'
+import LocalMusicInfo from '../utils/save-music-info'
 
 export default class SaveSongList extends BasePage {
   config = {
@@ -26,6 +27,7 @@ export default class SaveSongList extends BasePage {
 
   data = {
     list: [],
+    empty: false,
   }
 
   computed = {
@@ -41,14 +43,21 @@ export default class SaveSongList extends BasePage {
   }
 
   onReady() {
-    this.getList(0);
+    this.getLocalList();
   }
 
-  async getList(offset) {
-    let res = await HttpRequest.getMusicList(2);
-    console.log(res);
-    this.list = this.list.concat(res.data.song_list);
-    console.log(this.list);
+  getLocalList() {
+    var localList = LocalMusicInfo.getSaveSongList();
+    if (localList) {
+      this.empty = false;
+      for (var i = 0; i <= localList.length - 1; i++) {
+        var songInfo = LocalMusicInfo.getSongInfo(localList[i]).songinfo;
+        this.list.push(songInfo);
+      }
+
+    } else {
+      this.empty = true;
+    }
     this.$apply();
   }
 
