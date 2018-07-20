@@ -5,7 +5,7 @@
 <template>
   <view class="container">
     <repeat for="{{list}}" key="index" index="index" item="item">
-      <songlistitem :item="item"></songlistitem>
+      <songlistitem :item="item" :showMore="true"></songlistitem>
     </repeat>
   </view>
 </template>
@@ -19,7 +19,7 @@ import LocalMusicInfo from '../utils/save-music-info'
 
 export default class SaveSongList extends BasePage {
   config = {
-    navigationBarTitleText: '保存歌曲',
+    navigationBarTitleText: '最近播放歌曲列表',
   }
   components = {
     songlistitem: SongListItem,

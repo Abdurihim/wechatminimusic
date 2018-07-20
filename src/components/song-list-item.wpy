@@ -3,11 +3,15 @@
         <view class="song-item" data-songid="{{item.song_id}}" bindtap="goToItemInfo">
           <view class="line"/>
           <image class="song-avatar" src="{{item.pic_small}}"/>
+          <picker wx-if="{{showMore}}" catchtap="" catchchange="bindPickerChange" range="{{menu}}">
+            <image class="more" src="../images/more.png"/>
+          </picker>
           <view class="song-text">
               <text class="song-title">{{item.title}}</text>
               <text class="song-album">专辑：{{item.album_title}}</text>
               <text class="song-author">演唱：{{item.author}}</text>
           </view>
+
         </view>
         <text class="divider"/>
       </view>
@@ -17,15 +21,27 @@
   import wepy from 'wepy'
 
   export default class SongListItem extends wepy.component {
+    props = {
+      showMore: {
+        type: Boolean,
+        default: false,
+      },
+    }
+
     data = {
+      menu: ["删除"],
     }
 
     methods = {
       goToItemInfo(e) {
-        console.log(e);
         wepy.navigateTo({
           url: '/pages/song_item_info?song_id=' + e.currentTarget.dataset['songid'],
         });
+      },
+
+      bindPickerChange(e) {
+        console.log("bindPickerChange->");
+        console.log(e);
       },
     }
 
@@ -99,5 +115,16 @@
     margin-top: 5rpx;
     color: #666;
     display: block;
+  }
+
+  .more {
+    display: inline-block;
+    position: relative;
+    float: right;
+    width: 50rpx;
+    height: 50rpx;
+    margin-top: 40rpx;
+    margin-bottom: 40rpx;
+    z-index: 5;
   }
 </style>

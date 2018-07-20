@@ -5,7 +5,7 @@
 <template>
   <view class="container">
     <repeat for="{{list}}" key="index" index="index" item="item">
-      <songlistitem :item="item"></songlistitem>
+      <songlistitem :item="item" :showMore="false"></songlistitem>
     </repeat>
   </view>
 </template>
