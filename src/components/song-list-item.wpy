@@ -3,7 +3,7 @@
         <view class="song-item" data-songid="{{item.song_id}}" bindtap="goToItemInfo">
           <view class="line"/>
           <image class="song-avatar" src="{{item.pic_small}}"/>
-          <picker wx-if="{{showMore}}" catchtap="" catchchange="bindPickerChange" range="{{menu}}">
+          <picker wx-if="{{showMore}}" catchtap="" catchchange="bindPickerChange" range="{{menu}}"  data-songid="{{item.song_id}}">
             <image class="more" src="../images/more.png"/>
           </picker>
           <view class="song-text">
@@ -19,6 +19,7 @@
 
 <script>
   import wepy from 'wepy'
+  import LocalMusicInfo from '../utils/save-music-info'
 
   export default class SongListItem extends wepy.component {
     props = {
@@ -40,8 +41,9 @@
       },
 
       bindPickerChange(e) {
-        console.log("bindPickerChange->");
-        console.log(e);
+        console.log('bindPickerChange->');
+        var songid = e.currentTarget.dataset['songid'];
+        LocalMusicInfo.removeSongInfo(songid);
       },
     }
 
