@@ -46,7 +46,7 @@ export default class LocalMusicInfo {
         songIdsArray = JSON.parse(songIds);
         var i = 0;
         for (; i <= songIdsArray.length-1; i++) {
-          if (songIdsArray[i] == songId) {
+          if (songIdsArray[i] === songId) {
             hasSongId = true;
             break;
           }
@@ -77,7 +77,7 @@ export default class LocalMusicInfo {
         songIdsArray = JSON.parse(songIds);
         var i = 0;
         for (; i <= songIdsArray.length-1; i++) {
-          if (songIdsArray[i] == songId) {
+          if (songIdsArray[i] === songId) {
             hasSongId = true;
             break;
           }
@@ -103,6 +103,15 @@ export default class LocalMusicInfo {
       var songIds = wepy.getStorageSync(STORE_KEY.SONG_IDS);
       var songIdsArray = JSON.parse(songIds);
       return songIdsArray;
+    }
+
+    static getSaveSongListSize() {
+      return this.getSaveSongList().length;
+    }
+
+    static getSaveSongByIndex(index) {
+      var songList = this.getSaveSongList();
+      return songList[index];
     }
 
     static getSongInfo(songId) {
@@ -131,6 +140,30 @@ export default class LocalMusicInfo {
         	wepy.setStorageSync(STORE_KEY.SONG_IDS, JSON.stringify(songIdsArray));
         }
       }
+    }
+
+    static saveCurrentPlayTime(time) {
+      wepy.setStorageSync(STORE_KEY.PLAY_CURRENT_TIME, time);
+    }
+
+    static getCurrentPlayTime() {
+      return wepy.getStorageSync(STORE_KEY.PLAY_CURRENT_TIME);
+    }
+
+    static removeCurrentPlayTime() {
+      wepy.removeStorageSync(STORE_KEY.PLAY_CURRENT_TIME);
+    }
+
+    static saveCurrentPlaySongId(songId) {
+      wepy.setStorageSync(STORE_KEY.CURRENT_PALY_SONG_ID, songId);
+    }
+
+    static getCurrentPlaySongId() {
+      return wepy.getStorageSync(STORE_KEY.CURRENT_PALY_SONG_ID);
+    }
+
+    static removeCurrentPlaySongId() {
+      wepy.removeStorageSync(STORE_KEY.CURRENT_PALY_SONG_ID);
     }
 
 }
