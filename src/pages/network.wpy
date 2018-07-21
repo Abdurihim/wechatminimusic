@@ -62,14 +62,11 @@ export default class Network extends BasePage {
   }
   
   onPullDownRefresh() {
-    console.log('onPullDownRefresh method invoke. page');
     this.getList(0);
   }
 
   onReachBottom() {
-    console.log('onReachBottom method invoke. page.');
     this.offset = this.offset + 20;
-    console.log("bottom offset:" + this.offset);
     this.getList(this.offset);
   }
 

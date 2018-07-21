@@ -1,12 +1,12 @@
 <template>
   <view class="container">
-    <view class="back-home-menu">
+    <view class="back-home-menu" @tap="backHome">
       <image mode="aspectFit" src="../images/home_back.png"/>
     </view>
     
     <view class="share-song-menu">
-      <button open-type="share"></button>
       <image mode="aspectFit" src="../images/share.png"/>
+      <button open-type="share"></button>
     </view>
     
     <text class="info-author" @tap="getAuthorInfo">歌手：{{musicInfo.songinfo.author}}</text>
@@ -60,6 +60,7 @@
       startTime: '00:00',
       endTime: '00:00',
       hasAnim: true,
+      currentPlaySongId: undefined,
     }
 
     computed = {
@@ -130,6 +131,12 @@
         wepy.pauseBackgroundAudio();
         this.changeSliderValue(e.detail.value);
       },
+
+      backHome(e) {
+        wepy.switchTab({
+          url: '/pages/network',
+        });
+      }
     }
 
     changeSliderValue(currentValue) {
@@ -141,6 +148,9 @@
       var updateSongId = wepy.getStorageSync(STORE_KEY.UPDATE_PLAY_SONG_ID);
       if (updateSongId) {
         if (updateSongId === this.songId) {
+          return;
+        }
+        if (!this.backgroundAudioManager) {
           return;
         }
         this.backgroundAudioManager.stop();
@@ -156,6 +166,25 @@
     }
 
     onReady() {
+      //此处返回的是一个Promise对象，可链式调用，估计是wepy的封装
+      var state = wepy.getBackgroundAudioPlayerState();
+      var that = this;
+      state.then(function(e) {
+        console.log('song playing->' + e);
+        that.currentPlaySongId = wepy.getStorageSync(STORE_KEY.CURRENT_PALY_SONG_ID);
+        that.setSongData();
+
+      }, function(e) {
+        console.log('no playing->' + e);
+        that.setSongData();
+
+      }).catch(function(e) {
+        console.log(e);
+        console.log('catch->');
+      });
+    }
+
+    setSongData() {
       this.getMusicInfo();
       this.Const = require('../utils/const');
       this.playMode = this.Const.PLAY_MODE.LIST_CYCLE;
@@ -220,14 +249,31 @@
         this.hasAnim = false;
         return;
       }
-      wepy.playBackgroundAudio({
-          dataUrl: this.musicInfo.bitrate.file_link,
-          title: this.musicInfo.songinfo.title,
-          coverImgUrl: this.musicImg,
-      });
+      console.log(this.currentPlaySongId);
+      console.log(this.songId);
+      if (this.currentPlaySongId) {
+        if (this.currentPlaySongId === this.songId) {
+          console.log('currentPlaySongId:' + this.currentPlaySongId + ', songId:' + this.songId);
+          console.log('play the same song id.');
+        } else {
+          this.playSongAudio();
+        }
+      } else {
+        this.playSongAudio();
+      }
+      
       this.pausedIcon = "../images/play.png";
       this.hasAnim = true;
       this.$apply();
+    }
+
+    playSongAudio() {
+      wepy.playBackgroundAudio({
+        dataUrl: this.musicInfo.bitrate.file_link,
+        title: this.musicInfo.songinfo.title,
+        coverImgUrl: this.musicImg,
+      });
+      wepy.setStorageSync(STORE_KEY.CURRENT_PALY_SONG_ID, this.songId);
     }
 
     initAudioMananger() {
@@ -312,7 +358,7 @@
 <style lang="less">
   .back-home-menu {
     position: absolute;
-    left: 20rpx;
+    left: 40rpx;
     top: 20rpx;
     width: 60rpx;
     height: 60rpx;
@@ -332,17 +378,18 @@
   }
 
   .share-song-menu button {
+    position: absolute;
     background: none;
     width: 60rpx;
     height: 60rpx;
-    z-index: 10;
   }
 
   .share-song-menu button:after {
     border: none;
   }
 
-  .share-song-menu button image {
+  .share-song-menu image {
+    position: absolute;
     width: 60rpx;
     height: 60rpx;
     line-height: 60rpx;
