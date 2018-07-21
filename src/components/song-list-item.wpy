@@ -3,9 +3,9 @@
         <view class="song-item" data-songid="{{item.song_id}}" bindtap="goToItemInfo">
           <view class="line"/>
           <image class="song-avatar" src="{{item.pic_small}}"/>
-          <picker wx-if="{{showMore}}" catchtap="" catchchange="bindPickerChange" range="{{menu}}"  data-songid="{{item.song_id}}">
-            <image class="more" src="../images/more.png"/>
-          </picker>
+        
+          <image wx-if="{{showmore}}" class="more" src="../images/more.png" catchtap="showSheet"  data-songid="{{item.song_id}}"/>
+          
           <view class="song-text">
               <text class="song-title">{{item.title}}</text>
               <text class="song-album">专辑：{{item.album_title}}</text>
@@ -15,39 +15,78 @@
         </view>
         <text class="divider"/>
       </view>
+
+      <action-sheet hidden="{{actionSheetHidden}}" bindchange="actionSheetChange">
+        <block wx:for="{{actionSheetItems}}" wx:key="index">
+            <action-sheet-item class="item" bindtap="bindItemTap" data-name="{{item}}">{{item}}</action-sheet-item>
+        </block>
+        <action-sheet-cancel class="cancel">取消</action-sheet-cancel>
+    </action-sheet>
 </template>
 
 <script>
   import wepy from 'wepy'
   import LocalMusicInfo from '../utils/save-music-info'
+  import {SONG_LIST_MENU, UPDATE_PLAY_SONG_ID} from '../utils/const'
 
   export default class SongListItem extends wepy.component {
     props = {
-      showMore: {
+      showmore: {
         type: Boolean,
         default: false,
+        value: false,
       },
     }
 
     data = {
-      menu: ["删除"],
+      actionSheetItems: ["删除"],
+      actionSheetHidden: true,
+      curSongid: undefined,
     }
 
     methods = {
       goToItemInfo(e) {
-        wepy.navigateTo({
-          url: '/pages/song_item_info?song_id=' + e.currentTarget.dataset['songid'],
-        });
+        if (this.showmore.valueOf()) {
+          var that = this;
+          var songid = e.currentTarget.dataset['songid'];
+          wepy.setStorageSync(UPDATE_PLAY_SONG_ID, songid);
+          wx.navigateBack({
+            delta: 1,
+          });
+
+        } else {
+          wepy.navigateTo({
+            url: '/pages/song_item_info?song_id=' + e.currentTarget.dataset['songid'],
+          });  
+        }
       },
 
-      bindPickerChange(e) {
-        console.log('bindPickerChange->');
-        var songid = e.currentTarget.dataset['songid'];
-        LocalMusicInfo.removeSongInfo(songid);
+      showSheet(e) {
+        this.curSongid = e.currentTarget.dataset.songid;
+        this.actionSheetHidden = !this.actionSheetHidden;
+        this.$apply();
+      },
+
+      actionSheetChange(e) {
+        this.actionSheetHidden = !this.actionSheetHidden;
+        this.$apply();
+      },
+
+      bindItemTap(e) {
+        if (e.currentTarget.dataset.comIndex == 6) {
+          
+        } else if (e.currentTarget.dataset.comIndex == 0) {
+          var songid = this.curSongid;
+          LocalMusicInfo.removeSongInfo(songid);
+          this.$emit('delete-local-song-event', {}, {});
+        }
+        this.actionSheetHidden = !this.actionSheetHidden;
+        this.$apply();
       },
     }
 
     onLoad () {
+      
     }
   }
 </script>

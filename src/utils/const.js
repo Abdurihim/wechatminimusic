@@ -11,3 +11,10 @@ exports.STORE_KEY = {
 exports.MAX_SAVE_LEN = {
 	LEN: 30,
 }
+
+exports.SONG_LIST_MENU = {
+	DELETE: 0,
+	SHARE: 1,
+}
+
+exports.UPDATE_PLAY_SONG_ID = 'update_play_song_id'

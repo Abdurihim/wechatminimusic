@@ -38,6 +38,16 @@
       
     }
 
+    events = {
+      'update-play-song-event' : (e) => {
+        console.log('update-play-song-event ->');
+        console.log(e);
+        this.songId = e.songid;
+        this.$apply();
+        this.getMusicInfo();
+      },
+    }
+
     data = {
       songId: '',
       musicInfo: undefined,
@@ -128,8 +138,17 @@
         this.backgroundAudioManager.seek(seek);
     }
 
+    onShow(res) {
+      var updateSongId = wepy.getStorageSync(this.Const.UPDATE_PLAY_SONG_ID);
+      if (updateSongId) {
+        this.songid = updateSongId;
+        this.$apply();
+        this.getMusicInfo();
+        wepy.removeStorageSync(this.Const.UPDATE_PLAY_SONG_ID);
+      }
+    }
+
     onLoad(options) {
-      console.log(options);
       this.songId = options.song_id;
     }
 
@@ -213,7 +232,6 @@
       let that = this;
       this.backgroundAudioManager = wepy.getBackgroundAudioManager();
       this.backgroundAudioManager.onStop(function(e) {
-        console.log("onStop ->" + e);
         that.pauseAudio(e);
       });
       this.backgroundAudioManager.onPause(function(e) {
@@ -277,7 +295,6 @@
     }
 
     playError(e) {
-      console.log("play error");
       this.hasAnim = false;
     }
 

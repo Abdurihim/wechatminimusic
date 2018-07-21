@@ -5,7 +5,7 @@
 <template>
   <view class="container">
     <repeat for="{{list}}" key="index" index="index" item="item">
-      <songlistitem :item="item" :showMore="true"></songlistitem>
+      <songlistitem :item="item" showmore="true"></songlistitem>
     </repeat>
   </view>
 </template>
@@ -28,12 +28,21 @@ export default class SaveSongList extends BasePage {
   data = {
     list: [],
     empty: false,
+    menuShareSongId: undefined,
   }
 
   computed = {
     
   }
-
+  
+  events = {
+    //事件监听 更新本地列表
+    'delete-local-song-event' : (e) => {
+      this.list.splice(0, this.list.length);
+      this.getLocalList();
+    },
+  }
+  
   methods = {
     
   }
@@ -51,14 +60,58 @@ export default class SaveSongList extends BasePage {
     if (localList) {
       this.empty = false;
       for (var i = 0; i <= localList.length - 1; i++) {
-        var songInfo = LocalMusicInfo.getSongInfo(localList[i]).songinfo;
-        this.list.push(songInfo);
+        var songid = localList[i];
+        if (songid) {
+          var songInfo = LocalMusicInfo.getSongInfo(songid).songinfo;
+          this.list.push(songInfo);
+        }
       }
 
     } else {
       this.empty = true;
     }
     this.$apply();
+  }
+
+  getMusicImg(songinfo) {
+      var musicImg = songinfo.pic_huge;
+      if (!musicImg) {
+        musicImg = songinfo.pic_big;
+      }
+      if (!musicImg) {
+        musicImg = songinfo.pic_premium;
+      }
+      if (!musicImg) {
+        musicImg = songinfo.pic_small;
+      }
+      //默认图片
+      if (!musicImg) {
+        musicImg = "http://p4.music.126.net/53yErDUlZ6cP9GhK6EnZig==/1399678303632262.jpg";
+      }
+      return musicImg;
+    }
+
+  onShareAppMessage(res) {
+    var songInfo = this.menuShareSongId ? this.shareSong(this.menuShareSongId) : this.shareSongDefault();
+    var musicImg = this.getMusicImg(songInfo);
+    return {
+      title: 'Mini-Music:' + songInfo.title + '-' + songInfo.author,
+      path: '/page/song_item_info?song_id=' + songInfo.song_id,
+      imageUrl: musicImg,
+    }
+  }
+
+  shareSongDefault() {
+    if (!this.list) {
+      return null;
+    }
+    var songInfo = this.list[0];
+    return songInfo;
+  }
+
+  shareSong(songid) {
+    var songInfo = LocalMusicInfo.getSongInfo(songid).songinfo;
+    return songInfo;
   }
 
 }

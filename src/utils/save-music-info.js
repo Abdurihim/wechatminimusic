@@ -111,7 +111,7 @@ export default class LocalMusicInfo {
       return songInfo;
     }
 
-    static removeSongInfo(songId) {
+    static removeSongInfo(songId, successCallback) {
       var songIds = wepy.getStorageSync(STORE_KEY.SONG_IDS);
       var songIdsArray = [];
       var hasSongId = false;
@@ -126,8 +126,9 @@ export default class LocalMusicInfo {
         }
 
         if (hasSongId) {
-        	songIdsArray.slice(i, 1);
+        	songIdsArray.splice(i, 1);
         	wepy.removeStorageSync(songId);
+        	wepy.setStorageSync(STORE_KEY.SONG_IDS, JSON.stringify(songIdsArray));
         }
       }
     }
