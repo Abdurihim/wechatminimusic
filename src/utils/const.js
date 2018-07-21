@@ -6,6 +6,7 @@ exports.PLAY_MODE = {
 
 exports.STORE_KEY = {
 	SONG_IDS: "song_ids",
+	UPDATE_PLAY_SONG_ID: 'update_play_song_id',
 }
 
 exports.MAX_SAVE_LEN = {
@@ -16,5 +17,3 @@ exports.SONG_LIST_MENU = {
 	DELETE: 0,
 	SHARE: 1,
 }
-
-exports.UPDATE_PLAY_SONG_ID = 'update_play_song_id'

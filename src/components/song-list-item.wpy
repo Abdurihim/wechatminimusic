@@ -27,7 +27,7 @@
 <script>
   import wepy from 'wepy'
   import LocalMusicInfo from '../utils/save-music-info'
-  import {SONG_LIST_MENU, UPDATE_PLAY_SONG_ID} from '../utils/const'
+  import {SONG_LIST_MENU, STORE_KEY} from '../utils/const'
 
   export default class SongListItem extends wepy.component {
     props = {
@@ -49,7 +49,7 @@
         if (this.showmore.valueOf()) {
           var that = this;
           var songid = e.currentTarget.dataset['songid'];
-          wepy.setStorageSync(UPDATE_PLAY_SONG_ID, songid);
+          wepy.setStorageSync(STORE_KEY.UPDATE_PLAY_SONG_ID, songid);
           wx.navigateBack({
             delta: 1,
           });

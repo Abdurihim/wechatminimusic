@@ -38,7 +38,7 @@ export default class SaveSongList extends BasePage {
   events = {
     //事件监听 更新本地列表
     'delete-local-song-event' : (e) => {
-      this.list.splice(0, this.list.length);
+      this.clearList();
       this.getLocalList();
     },
   }
@@ -55,8 +55,17 @@ export default class SaveSongList extends BasePage {
     this.getLocalList();
   }
 
+  onUnload() {
+    this.clearList();
+  }
+
+  clearList() {
+    this.list.splice(0, this.list.length);
+  }
+
   getLocalList() {
     var localList = LocalMusicInfo.getSaveSongList();
+    this.clearList();
     if (localList) {
       this.empty = false;
       for (var i = 0; i <= localList.length - 1; i++) {
