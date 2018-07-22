@@ -32,7 +32,7 @@ export default class BasePage extends wepy.page {
   onShareAppMessage(res) {
     return {
       title: 'Mini-Music:超级好听的在线歌曲~',
-      path: '/page/network',
+      path: '/pages/network',
       imageUrl: '../images/logo.png'
     }
   }

@@ -1,0 +1,42 @@
+<template>
+	<view class="go-top-style" wx:if="{{isShow}}" @tap="goTop">
+		<image mode="aspectFit" src="../images/go_top.png"/>
+	</view>
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class GoTop extends wepy.component {
+	props = {
+		isShow: {
+			type: Boolean,
+			default: true,
+		}
+	}
+
+	methods = {
+		goTop() {
+			wepy.pageScrollTo({
+				scrollTop: 0,
+				duration: 300,
+			});
+		}
+	}
+}
+</script>
+
+<style lang="less">
+ .go-top-style {
+  position: fixed;
+  bottom: 50rpx;
+  right: 20rpx;
+  width: 60rpx;
+  height: 60rpx;
+}
+
+.go-top-style image {
+	display: inline-block;
+	width: 60rpx;
+	height: 60rpx;
+}
+</style>

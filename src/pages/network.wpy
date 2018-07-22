@@ -1,12 +1,14 @@
 <style lang="less">
-  
+
 </style>
 
 <template>
+  <gotop></gotop>
   <view class="container">
     <repeat for="{{list}}" key="index" index="index" item="item">
       <songlistitem :item="item"></songlistitem>
     </repeat>
+    <empty hasMore="{{hasMore}}"></empty>
   </view>
 </template>
 
@@ -15,6 +17,8 @@ import wepy from 'wepy'
 import BasePage from './basepage'
 import SongListItem from '../components/song-list-item'
 import HttpRequest from '../utils/http-request'
+import Empty from '../components/empty'
+import GoTop from '../components/gotop'
 
 export default class Network extends BasePage {
   config = {
@@ -25,12 +29,15 @@ export default class Network extends BasePage {
   }
 
   components = {
-    songlistitem: SongListItem
+    songlistitem: SongListItem,
+    empty: Empty,
+    gotop: GoTop,
   }
 
   data = {
     list: [],
     offset: 0,
+    hasMore: true,
   }
 
   computed = {
@@ -47,6 +54,12 @@ export default class Network extends BasePage {
     wepy.stopPullDownRefresh();
     if (offset == 0) {
       this.list = [];
+    }
+    var result = res.data.song_list;
+    if (!result || result.length === 0) {
+      this.hasMore = false;
+    } else {
+      this.hasMore = true;
     }
     this.list = this.list.concat(res.data.song_list);
     console.log(this.list);

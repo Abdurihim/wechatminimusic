@@ -105,7 +105,7 @@ export default class SaveSongList extends BasePage {
     var musicImg = this.getMusicImg(songInfo);
     return {
       title: 'Mini-Music:' + songInfo.title + '-' + songInfo.author,
-      path: '/page/song_item_info?song_id=' + songInfo.song_id,
+      path: '/pages/song_item_info?song_id=' + songInfo.song_id,
       imageUrl: musicImg,
     }
   }

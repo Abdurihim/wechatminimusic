@@ -5,7 +5,7 @@
           <image class="song-avatar" src="{{item.pic_small}}"/>
         
           <image wx-if="{{showmore}}" class="more" src="../images/more.png" catchtap="showSheet"  data-songid="{{item.song_id}}"/>
-          
+
           <view class="song-text">
               <text class="song-title">{{item.title}}</text>
               <text class="song-album">专辑：{{item.album_title}}</text>
@@ -30,6 +30,8 @@
   import {SONG_LIST_MENU, STORE_KEY} from '../utils/const'
 
   export default class SongListItem extends wepy.component {
+    components = {
+    }
     props = {
       showmore: {
         type: Boolean,
@@ -42,6 +44,9 @@
       actionSheetItems: ["删除"],
       actionSheetHidden: true,
       curSongid: undefined,
+    }
+
+    computed = {
     }
 
     methods = {
@@ -86,7 +91,6 @@
     }
 
     onLoad () {
-      
     }
   }
 </script>

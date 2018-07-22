@@ -1,0 +1,56 @@
+<template>
+	<view class="empty-container">
+		<view class="empty-line"></view>
+		<text class="tip-style">{{tips}}</text>
+	</view>
+</template>
+
+<script>
+import wepy from 'wepy'
+export default class Empty extends wepy.component {
+	data = {
+		
+	}
+
+	props = {
+		hasMore: {
+			type: Boolean,
+			default: true,
+		}
+	}
+
+	computed = {
+		tips() {
+			var tip = '';
+			if (this.hasMore.valueOf()) {
+				tip = '正在加载更多...';
+			} else {
+				tip = '没有更多内容';
+			}
+
+			return tip;
+		}
+	}
+}
+</script>
+
+<style lang="less">
+.empty-container {
+	width: 100%;
+	text-align: center;
+}
+
+.empty-line {
+	width: 100%;
+    height: 1rpx;
+    background-color: #ccc;
+}
+
+.tip-style {
+	margin-top: 25rpx;
+	margin-bottom: 25rpx;
+	font-size: 25rpx;
+	display: block;
+	color: #999;
+}
+</style>

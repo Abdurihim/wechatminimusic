@@ -112,11 +112,11 @@
 
       slider4Change(e) {
         this.changeSliderValue(e.detail.value);
-        wepy.playBackgroundAudio();
+        this.backgroundAudioManager.play();
       },
 
       slider4Changing(e) {
-        wepy.pauseBackgroundAudio();
+        this.backgroundAudioManager.pause();
         this.changeSliderValue(e.detail.value);
       },
 
@@ -158,13 +158,9 @@
           });
           return;
         }
-        if (!this.backgroundAudioManager) {
-          wepy.removeStorage({
-            key:STORE_KEY.UPDATE_PLAY_SONG_ID,
-          });
-          return;
-        }
-        this.playStop();
+        LocalMusicInfo.removeCurrentPlayTime();
+        LocalMusicInfo.removeCurrentPlaySongId();
+        this.currentPlaySongId = '';
         this.songId = updateSongId;
         this.$apply();
         this.getMusicInfo();
@@ -183,6 +179,7 @@
       var state = wepy.getBackgroundAudioPlayerState();
       var that = this;
       state.then(function(e) {
+        console.log('back ground audio state ->', e);
         if (e.status === SONG_PLAY_STATUS.PLAYING) {
           //正在播放
         } else if (e.status === SONG_PLAY_STATUS.PAUSE) {
@@ -230,7 +227,16 @@
     async getMusicInfo() {
       let res = await HttpRequest.getMusicInfo(this.songId);
       this.musicInfo = res.data;
-
+      console.log('get music info ->', res);
+      if (this.musicInfo.error_code) {
+        if (this.musicInfo.error_code === 22005) {
+          if (this.backgroundAudioManager) {
+            this.backgroundAudioManager.stop();
+          }
+          ToastUtil.showToast('获取歌曲信息错误，稍后重试');
+          return;
+        }
+      }
       this.setNavigationBarMusicTitle(this.musicInfo.songinfo.title);
       this.setMusicImg();
       this.initAudioMananger();
@@ -271,6 +277,7 @@
     }
 
     playStop() {
+      console.log('song item info, play stop');
       this.backgroundAudioManager.stop();
       this.pausedIcon = "../images/pause.png";
       this.hasAnim = false;
@@ -308,6 +315,7 @@
         this.hasAnim = false;
         return;
       }
+
       console.log('cu play id:', this.currentPlaySongId, ', songid:', this.songId);
       if (this.currentPlaySongId) {
         if (this.currentPlaySongId === this.songId) {
@@ -318,6 +326,7 @@
               this.backgroundAudioManager.startTime = currentTime;
             }
           }
+          this.backgroundAudioManager.play();
           this.currentPlaySongId = undefined;
         } else {
           this.playSongAudio();
@@ -332,11 +341,12 @@
     }
 
     playSongAudio() {
-      wepy.playBackgroundAudio({
-        dataUrl: this.musicInfo.bitrate.file_link,
-        title: this.musicInfo.songinfo.title,
-        coverImgUrl: this.musicImg,
-      });
+      this.backgroundAudioManager.title = this.musicInfo.songinfo.title;
+      this.backgroundAudioManager.coverImgUrl = this.musicImg;
+      this.backgroundAudioManager.singer = this.musicInfo.songinfo.author;
+      this.backgroundAudioManager.epname = this.musicInfo.songinfo.album_title;
+      this.backgroundAudioManager.src = this.musicInfo.bitrate.file_link;
+      this.backgroundAudioManager.play();
       LocalMusicInfo.saveCurrentPlaySongId(this.songId);
     }
 
@@ -344,7 +354,7 @@
       let that = this;
       this.backgroundAudioManager = wepy.getBackgroundAudioManager();
       this.backgroundAudioManager.onStop(function(e) {
-        that.playStop(e);
+        console.log('init audio manager -> onstop.');
       });
       this.backgroundAudioManager.onPause(function(e) {
         that.pauseAudio(e);
@@ -386,10 +396,13 @@
 
     pauseAudio(e) {
       console.log('pause audio', e);
-      wepy.pauseBackgroundAudio();
-      if (this.backgroundAudioManager && this.backgroundAudioManager.currentTime) {
-        LocalMusicInfo.saveCurrentPlayTime(this.backgroundAudioManager.currentTime);
+      if (this.backgroundAudioManager) {
+        this.backgroundAudioManager.pause();
+        if (this.backgroundAudioManager.currentTime) {
+          LocalMusicInfo.saveCurrentPlayTime(this.backgroundAudioManager.currentTime);
+        }
       }
+      
       this.currentPlaySongId = this.songId;
       this.pausedIcon = "../images/pause.png";
       this.hasAnim = false;
@@ -444,7 +457,7 @@
     onShareAppMessage(res) {
     return {
       title: 'Mini-Music:' + this.musicInfo.songinfo.title + '-' + this.musicInfo.songinfo.author,
-      path: '/page/song_item_info?song_id=' + this.songId,
+      path: '/pages/song_item_info?song_id=' + this.songId,
       imageUrl: this.musicImg,
     }
   }
