@@ -1,12 +1,12 @@
 # 微信小程序-MINI-Music
 
-##### 成果图：  
+#### 成果图：  
 
 ![成果图](./music.gif)
 
 ----
 
-##### 歌曲播放逻辑导图：  
+#### 歌曲播放逻辑导图：  
 
 ![歌曲播放逻辑导图](https://github.com/longyinzaitian/wechatminimusic/blob/master/%E6%AD%8C%E6%9B%B2%E6%92%AD%E6%94%BE%E9%80%BB%E8%BE%91%E5%AF%BC%E5%9B%BE.png)
 
@@ -15,7 +15,7 @@
 
 ---
 
-注意：  
+##### 注意：  
 1. 需要配置`project.config.json中`的`appid`字段设置成自己注册的id值。否则，微信开发工具有些功能用不了。
 2. 工程文件可用IDE工具打开目录文件夹，本人用的Sublime Text.
 3. 工程构建使用的WePY构建的。需要把clone到本地后，安装WePY进行构建，完成后，再通过微信开发者工具打开dist目录就可以了。
