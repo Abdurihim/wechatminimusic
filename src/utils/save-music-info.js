@@ -87,7 +87,7 @@ export default class LocalMusicInfo {
         	if (i > 0) {
         		return songIdsArray[i-1];
         	} else {
-        		return songIdsArray[i];
+        		return songIdsArray[songIdsArray.length-1];
         	}
         }
       }
