@@ -34,7 +34,7 @@
 4. WePY官方文档：https://tencent.github.io/wepy/document.html#/
      
     
-     
+---
 Copyright (c) 2019 longyinzaitian
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
