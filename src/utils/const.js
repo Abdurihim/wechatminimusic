@@ -23,5 +23,6 @@ exports.SONG_LIST_MENU = {
 
 exports.SONG_PLAY_STATUS = {
 	PLAYING: 1,
-	PAUSE: 2,
+	PAUSE: 0,
+	STOP: 2,
 }

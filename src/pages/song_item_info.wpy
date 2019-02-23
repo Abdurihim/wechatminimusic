@@ -9,8 +9,8 @@
       <button open-type="share"></button>
     </view>
     
-    <text class="info-author" @tap="getAuthorInfo">歌手：{{musicInfo.songinfo.author}}</text>
-    <text class="info-album" bindtap="getAlbumInfo">专辑：{{musicInfo.songinfo.album_title}}</text>
+    <text class="info-author">歌手：{{musicInfo.songinfo.author}}</text>
+    <text class="info-album">专辑：{{musicInfo.songinfo.album_title}}</text>
     <image class="{{hasAnim ? 'info-img-anim' : 'info-img'}}" mode="widthFix" src="{{musicImg}}" @tap="showBigImg"/>
 
     <view class="menu-container">
@@ -58,18 +58,12 @@
       startTime: '00:00',
       endTime: '00:00',
       hasAnim: true,
-      currentPlaySongId: undefined,
+
+      playState: 2,//2停止 0暂停 1播放中
+      isSameSongId: false,
     }
 
     methods = {
-      getAlbumInfo(e) {
-        console.log("getAlbumInfo ->" + e);
-      },
-
-      getAuthorInfo(e) {
-        console.log("getAuthorInfo() ->" + e);
-      },
-
       switchPlayMode(e) {
         this.setPlayMode();
       },
@@ -79,11 +73,12 @@
       },
 
       pauseOrPlay(e) {
-        let paused = this.backgroundAudioManager.paused;
-        if (paused) {
-          this.playMusic();
-        } else {
+        if (this.playState === SONG_PLAY_STATUS.PLAYING) {
           this.pauseAudio();
+        } else if (this.playState === SONG_PLAY_STATUS.PAUSE) {
+          this.playAudioAfterPause();
+        } else if (this.playState === SONG_PLAY_STATUS.STOP) {
+          this.playSongAudio();
         }
       },
 
@@ -146,15 +141,13 @@
     onShow(res) {
       var updateSongId = wepy.getStorageSync(STORE_KEY.UPDATE_PLAY_SONG_ID);
       if (updateSongId) {
-        if (updateSongId === this.songId) {
+        if (this.checkPlayingSongId(updateSongId)) {
           wepy.removeStorage({
             key:STORE_KEY.UPDATE_PLAY_SONG_ID,
           });
           return;
         }
-        LocalMusicInfo.removeCurrentPlayTime();
-        LocalMusicInfo.removeCurrentPlaySongId();
-        this.currentPlaySongId = '';
+        this.isSameSongId = false;
         this.songId = updateSongId;
         this.$apply();
         this.getMusicInfo();
@@ -169,33 +162,31 @@
     }
 
     onReady() {
+      this.Const = require('../utils/const');
+      this.initPlayMode();
       //此处返回的是一个Promise对象，可链式调用，估计是wepy的封装
       var state = wepy.getBackgroundAudioPlayerState();
       var that = this;
       state.then(function(e) {
         console.log('back ground audio state ->', e);
-        if (e.status === SONG_PLAY_STATUS.PLAYING) {
-          //正在播放
-        } else if (e.status === SONG_PLAY_STATUS.PAUSE) {
-          that.pauseAudio();
+        that.playState = e.status;
+        var currentPlaySongId = LocalMusicInfo.getCurrentPlaySongId();
+        if (that.checkPlayingSongId(currentPlaySongId)) {
+          that.isSameSongId = true;
+        } else {
+          that.isSameSongId = false;
         }
-        that.currentPlaySongId = LocalMusicInfo.getCurrentPlaySongId();
-        that.setSongData();
+        that.getMusicInfo();
 
       }, function(e) {
         console.log('no playing->', e);
-        that.setSongData();
+        that.isSameSongId = false;
+        that.getMusicInfo();
 
       }).catch(function(e) {
         console.log(e);
         console.log('catch->');
       });
-    }
-
-    setSongData() {
-      this.Const = require('../utils/const');
-      this.getMusicInfo();
-      this.initPlayMode();
     }
 
     initPlayMode() {
@@ -224,20 +215,21 @@
       console.log('get music info ->', res);
       if (this.musicInfo.error_code) {
         if (this.musicInfo.error_code === 22005) {
-          if (this.backgroundAudioManager) {
-            this.backgroundAudioManager.stop();
-          }
-          ToastUtil.showToast('获取歌曲信息错误，稍后重试');
+          this.playError('获取歌曲信息错误，稍后重试');
           return;
         }
       }
       this.setNavigationBarMusicTitle(this.musicInfo.songinfo.title);
       this.setMusicImg();
       this.initAudioMananger();
-      this.playMusic();
       this.initMusicTime();
       this.saveSongInfo();
       this.$apply();
+      if (this.isSameSongId) {
+        this.checkPlayState();
+      } else {
+        this.playSongAudio();
+      }
     }
 
     //缓存最近播放歌曲列表
@@ -270,98 +262,20 @@
       }
     }
 
-    playStop() {
-      console.log('song item info, play stop');
-      this.backgroundAudioManager.stop();
-      this.pausedIcon = "../images/pause.png";
-      this.hasAnim = false;
-      this.$apply();
-      LocalMusicInfo.removeCurrentPlayTime();
-      LocalMusicInfo.removeCurrentPlaySongId();
-    }
-
-    playNext() {
-      var nextSongid = LocalMusicInfo.getNextSongInfo(this.songId);
-      console.log('next songid:', nextSongid, ', song id:', this.songId);
-      //当列表只有一首歌曲，相当于单曲循环播放
-      if (nextSongid === this.songId) {
-        this.playMusic();
-      } else {
-        this.songId = nextSongid;
-        this.getMusicInfo();
-      }
-    }
-
-    playPre() {
-      var preSongId = LocalMusicInfo.getPreSongInfo(this.songId);
-      console.log('next preSongId:', preSongId, ', song id:', this.songId);
-      if (preSongId === this.songId) {
-        this.playMusic();
-      } else {
-        this.songId = preSongId;
-        this.getMusicInfo();
-      }
-    }
-
-    playMusic() {
-      if (!this.musicInfo.bitrate.file_link) {
-        ToastUtil.showToast('没有有效的歌曲文件');
-        this.hasAnim = false;
-        return;
-      }
-
-      console.log('cu play id:', this.currentPlaySongId, ', songid:', this.songId);
-      if (this.currentPlaySongId) {
-        if (this.currentPlaySongId === this.songId) {
-          if (this.backgroundAudioManager) {
-            if (this.backgroundAudioManager.paused) {
-              var currentTime = LocalMusicInfo.getCurrentPlayTime();
-              console.log('currentTime:', currentTime);
-              if (currentTime) {
-                this.backgroundAudioManager.startTime = currentTime;
-              }
-              this.backgroundAudioManager.play();
-            } else {
-              this.playSongAudio();
-            }
-          }
-          this.currentPlaySongId = undefined;
-        } else {
-          this.playSongAudio();
-        }
-      } else {
-        this.playSongAudio();
-      }
-      
-      this.pausedIcon = "../images/play.png";
-      this.hasAnim = true;
-      this.$apply();
-    }
-
-    playSongAudio() {
-      this.backgroundAudioManager.title = this.musicInfo.songinfo.title;
-      this.backgroundAudioManager.coverImgUrl = this.musicImg;
-      this.backgroundAudioManager.singer = this.musicInfo.songinfo.author;
-      this.backgroundAudioManager.epname = this.musicInfo.songinfo.album_title;
-      this.backgroundAudioManager.src = this.musicInfo.bitrate.file_link;
-      this.backgroundAudioManager.play();
-      LocalMusicInfo.saveCurrentPlaySongId(this.songId);
-    }
-
     initAudioMananger() {
       let that = this;
       this.backgroundAudioManager = wepy.getBackgroundAudioManager();
       this.backgroundAudioManager.onStop(function(e) {
-        console.log('init audio manager -> onstop.');
+        that.playStop(e);
       });
       this.backgroundAudioManager.onPause(function(e) {
-        that.pauseAudio(e);
+        that.setSongPlayingData(false, SONG_PLAY_STATUS.PAUSE);
       });
       this.backgroundAudioManager.onEnded(function(e) {
         that.playEnd(e);
       });
       this.backgroundAudioManager.onError(function(e) {
-        that.playError(e);
+        console.log('audio manager play error:', e);
       });
       this.backgroundAudioManager.onTimeUpdate(function(e) {
         if (that.backgroundAudioManager && that.backgroundAudioManager.currentTime) {
@@ -370,16 +284,6 @@
           that.$apply();
         }
       });
-    }
-
-    updateStartTime(that, currentTime) {
-      that.startTime = parseInt(currentTime/60);
-      var second = parseInt(currentTime%60);
-      if (second >= 0 && second <= 9) {
-        that.startTime = "0" + that.startTime + ":0" + second;
-      } else {
-        that.startTime = "0" + that.startTime + ":" + second;
-      }
     }
 
     initMusicTime() {
@@ -392,6 +296,87 @@
       }
     }
 
+    playStop() {
+      console.log('song item info, play stop');
+      this.backgroundAudioManager.stop();
+      this.setSongPlayingData(false, SONG_PLAY_STATUS.STOP);
+    }
+
+    playNext() {
+      var nextSongid = LocalMusicInfo.getNextSongInfo(this.songId);
+      console.log('next songid:', nextSongid, ', song id:', this.songId);
+      //当列表只有一首歌曲，相当于单曲循环播放
+      if (this.checkPlayingSongId(nextSongid)) {
+        this.isSameSongId = true;
+        this.checkPlayState();
+      } else {
+        this.isSameSongId = false;
+        if (nextSongid) {
+          this.songId = nextSongid;
+        }
+        this.getMusicInfo();
+      }
+    }
+
+    playPre() {
+      var preSongId = LocalMusicInfo.getPreSongInfo(this.songId);
+      console.log('next preSongId:', preSongId, ', song id:', this.songId);
+      if (this.checkPlayingSongId(preSongId)) {
+        this.isSameSongId = true;
+        this.checkPlayState();
+      } else {
+        this.isSameSongId = false;
+        if (preSongId) {
+          this.songId = preSongId;
+        }
+        this.getMusicInfo();
+      }
+    }
+
+    playAudioAfterPause(e) {
+      console.log('play audio', e);
+      this.setSongPlayingData(true, SONG_PLAY_STATUS.PLAYING);
+      var currentTime = LocalMusicInfo.getCurrentPlayTime();
+      console.log('currentTime:', currentTime);
+      if (currentTime) {
+        this.backgroundAudioManager.startTime = currentTime;
+      }
+      this.backgroundAudioManager.play();
+      this.$apply();
+    }
+
+    playSongAudio() {
+      if (!this.musicInfo.bitrate.file_link) {
+        this.playError('无效的播放链接');
+        return;
+      }
+      this.setSongPlayingData(true, SONG_PLAY_STATUS.PLAYING);
+      this.backgroundAudioManager.title = this.musicInfo.songinfo.title;
+      this.backgroundAudioManager.coverImgUrl = this.musicImg;
+      this.backgroundAudioManager.singer = this.musicInfo.songinfo.author;
+      this.backgroundAudioManager.epname = this.musicInfo.songinfo.album_title;
+      this.backgroundAudioManager.src = this.musicInfo.bitrate.file_link;
+      this.backgroundAudioManager.play();
+      LocalMusicInfo.saveCurrentPlaySongId(this.songId);
+    }
+
+    setSongPlayingData(isPlaying, status) {
+      this.hasAnim = isPlaying;
+      this.playState = status;
+      this.pausedIcon = isPlaying ? '../images/play.png' : '../images/pause.png';
+      this.$apply();
+    }
+
+    updateStartTime(that, currentTime) {
+      that.startTime = parseInt(currentTime/60);
+      var second = parseInt(currentTime%60);
+      if (second >= 0 && second <= 9) {
+        that.startTime = "0" + that.startTime + ":0" + second;
+      } else {
+        that.startTime = "0" + that.startTime + ":" + second;
+      }
+    }
+
     pauseAudio(e) {
       console.log('pause audio', e);
       if (this.backgroundAudioManager) {
@@ -400,46 +385,56 @@
           LocalMusicInfo.saveCurrentPlayTime(this.backgroundAudioManager.currentTime);
         }
       }
-      
-      this.currentPlaySongId = this.songId;
-      this.pausedIcon = "../images/pause.png";
-      this.hasAnim = false;
-      this.$apply();
+      this.setSongPlayingData(false, SONG_PLAY_STATUS.PAUSE);
     }
 
     playEnd(e) {
-      this.hasAnim = false;
+      this.setSongPlayingData(false, SONG_PLAY_STATUS.STOP);
       if (this.playMode === this.Const.PLAY_MODE.LIST_CYCLE) {
         this.playNext();
 
       } else if (this.playMode === this.Const.PLAY_MODE.ONE_CYCLE) {
-        this.playMusic();
+        this.isSameSongId = true;
+        this.checkPlayState();
 
       } else if (this.playMode === this.Const.PLAY_MODE.RANDOM_CYCLE) {
-        this.randomPlay();
+        this.playRandom();
       }
-      this.$apply();
     }
 
-    randomPlay() {
-      var size = LocalMusicInfo.getSaveSongListSize();
-      if (size === 0) {
-        this.playStop();
-        return;
-      } else if (size === 1) {
-        if (this.songId === LocalMusicInfo.getSaveSongByIndex(0)) {
-          this.playStop();
-          return;
-        }
+    playError(msg) {
+      if (this.backgroundAudioManager) {
+        this.backgroundAudioManager.stop();
       }
+      ToastUtil.showToast(msg);
+      this.setSongPlayingData(false, SONG_PLAY_STATUS.STOP);
+    }
+
+    checkPlayState() {
+      if (this.playState === SONG_PLAY_STATUS.PLAYING) {
+        //do nothing
+      } else if (this.playState === SONG_PLAY_STATUS.PAUSE) {
+        this.playAudioAfterPause();
+      } else if (this.playState === SONG_PLAY_STATUS.STOP) {
+        this.playSongAudio();
+      }
+    }
+
+    playRandom() {
+      var size = LocalMusicInfo.getSaveSongListSize();
       var random = this.getRandomNum(0, size);
       var randomSongId = LocalMusicInfo.getSaveSongByIndex(random);
-      while(this.songId === randomSongId) {
-        random = this.getRandomNum(0, size);
-        randomSongId = LocalMusicInfo.getSaveSongByIndex(random);
+      console.log('size:', size, 'random:', random, 'randomSongId:', randomSongId);
+      if (this.checkPlayingSongId(randomSongId)) {
+        this.isSameSongId = true;
+        this.checkPlayState();
+      } else {
+        this.isSameSongId = false;
+        if (randomSongId) {
+          this.songId = randomSongId;
+        }
+        this.getMusicInfo();
       }
-      this.songId = randomSongId;
-      this.getMusicInfo();
     }
     // 获取最小值到最大值之前的整数随机数
     getRandomNum(Min, Max) {
@@ -448,17 +443,20 @@
       return (Min + Math.round(Rand * Range));
     }
 
-    playError(e) {
-      this.hasAnim = false;
+    onShareAppMessage(res) {
+      return {
+        title: 'Mini-Music:' + this.musicInfo.songinfo.title + '-' + this.musicInfo.songinfo.author,
+        path: '/pages/song_item_info?song_id=' + this.songId,
+        imageUrl: this.musicImg,
+      }
     }
 
-    onShareAppMessage(res) {
-    return {
-      title: 'Mini-Music:' + this.musicInfo.songinfo.title + '-' + this.musicInfo.songinfo.author,
-      path: '/pages/song_item_info?song_id=' + this.songId,
-      imageUrl: this.musicImg,
+    checkPlayingSongId(songid) {
+      if (songid === this.songId) {
+        return true;
+      }
+      return false;
     }
-  }
 }
 </script>
 
