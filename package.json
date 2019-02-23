@@ -14,7 +14,7 @@
     "module-a": false,
     "./src/components/list": "./src/components/wepy-list.wpy"
   },
-  "author": "1536132397@qq.com",
+  "author": "nyyin@qq.com",
   "license": "MIT",
   "dependencies": {
     "wepy": "^1.6.0",
