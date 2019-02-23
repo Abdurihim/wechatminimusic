@@ -101,7 +101,10 @@ export default class LocalMusicInfo {
 
     static getSaveSongList() {
       var songIds = wepy.getStorageSync(STORE_KEY.SONG_IDS);
-      var songIdsArray = JSON.parse(songIds);
+      var songIdsArray = [];
+      if (songIds) {
+        songIdsArray = JSON.parse(songIds);
+      }
       return songIdsArray;
     }
 
